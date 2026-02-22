@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Clackgram</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; font-family:'Inter',sans-serif; margin:0; padding:0; }
+body { display:flex; justify-content:center; align-items:center; min-height:100vh; background:#000; color:white; }
+
+/* Общий фон со звёздами */
+.page {
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background-color:#000;
+  background-image:
+    radial-gradient(circle, white 1px, transparent 1px),
+    radial-gradient(circle, white 1px, transparent 1px),
+    radial-gradient(circle, white 1px, transparent 1px),
+    radial-gradient(circle, white 1px, transparent 1px),
+    radial-gradient(circle, white 1px, transparent 1px);
+  background-size: 3px 3px,4px 4px,2px 2px,3px 3px,2px 2px;
+  background-position: 5% 10%,20% 30%,40% 60%,60% 20%,75% 50%;
+  background-repeat: no-repeat;
+}
+.page { display:none; } 
+#page1 { display:flex; }
+
+/* Общие стили */
+.container { width:90%; max-width:400px; text-align:center; margin-bottom:40px; }
+h1 { font-weight:700; margin-bottom:40px; font-size:2em; }
+.label { text-align:left; color:#b3b3b3; font-size:1em; margin-bottom:5px; }
+input { width:100%; padding:16px; margin-bottom:25px; border-radius:12px; border:none; background-color:#2a2a2a; color:white; font-size:1em; }
+input:focus { outline:none; background-color:#333; }
+.submit-btn { width:100%; padding:16px; border-radius:14px; border:none; font-size:1.1em; font-weight:500; cursor:pointer; transition:0.3s; background-color:#b3b3b3; color:white; }
+.submit-btn.active { background-color:#5a189a; }
+.bottom-text { color:#b3b3b3; font-weight:300; font-size:0.9em; text-align:center; }
+
+/* Вторая страница */
+.avatar-circle {
+    width:150px; height:150px; background-color:#2a2a2a; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; margin-bottom:30px;
+    cursor:pointer; overflow:hidden; position:relative; border:2px solid #b3b3b3;
+}
+.avatar-circle img { width:100%; height:100%; object-fit:cover; display:block; }
+.camera-icon { width:70px; height:70px; }
+
+/* Поля ввода на второй странице */
+.page2-input { width:100%; padding:16px; margin-bottom:10px; border-radius:12px; border:none; background-color:#2a2a2a; color:white; font-size:1em; }
+.page2-input:focus { outline:none; background-color:#333; }
+#usernameError { color:#ff4d4d; font-size:0.85em; margin-bottom:10px; display:none; text-align:left; }
+
+/* Кнопка продолжить на второй странице */
+#continue2 { width:100%; padding:16px; border-radius:14px; border:none; font-size:1.1em; font-weight:500; cursor:pointer; transition:0.3s; background-color:#b3b3b3; color:white; margin-top:15px; }
+#continue2.active { background-color:#5a189a; }
+#fileInput { display:none; }
+
+/* Третий экран */
+@keyframes jump { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-15px);} }
+.emoji { font-size:70px; display:flex; justify-content:center; margin-bottom:20px; animation: jump 1s infinite; }
+
+/* Четвертая соцсеть */
+#socialFeed { display:none; width:100%; max-width:500px; padding:10px; flex-direction:column; align-items:center; overflow-y:auto; height:100vh; }
+.post { width:100%; background:#1a1a1a; border-radius:10px; margin-bottom:15px; padding:12px; font-size:1em; }
+.post-header { display:flex; justify-content:space-between; color:#b3b3b3; font-size:0.9em; margin-bottom:5px; }
+.post-content { color:white; font-size:1em; margin-bottom:5px; }
+.post-actions { display:flex; justify-content:flex-start; gap:15px; color:#b3b3b3; font-size:0.9em; }
+.post-actions .like.active { color:red; }
+.comment-section { margin-top:5px; }
+.comment-section input { width:100%; padding:10px; font-size:0.9em; border-radius:8px; border:none; background:#2a2a2a; }
+/* Адаптив для маленьких экранов */
+@media (max-width:400px){
+  h1{ font-size:1.5em; }
+  input, .page2-input, .submit-btn, #continue2{ padding:14px; font-size:1em; }
+  .emoji{ font-size:50px; }
+  .avatar-circle{ width:120px; height:120px; }
+  .camera-icon{ width:50px; height:50px; }
+  .post{ font-size:0.9em; padding:10px; }
+  .post-actions{ font-size:0.8em; gap:10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Первый экран -->
+<div class="page" id="page1">
+  <div class="container">
+    <h1>Зарегистрируйся!</h1>
+    <div class="label">Введи свой номер</div>
+    <input type="text" id="phone" placeholder="Номер телефона">
+    <div class="label">Придумай пароль</div>
+    <input type="password" id="password" placeholder="Пароль">
+    <button class="submit-btn" id="continueBtn">Продолжить</button>
+  </div>
+  <div class="bottom-text">добро пожаловать в clackgram</div>
+</div>
+
+<!-- Второй экран -->
+<div class="page" id="page2">
+  <div class="avatar-circle" id="avatarCircle">
+    <svg class="camera-icon" viewBox="0 0 64 64">
+      <rect x="4" y="16" width="56" height="36" rx="4" ry="4" fill="none" stroke="white" stroke-width="2"/>
+      <circle cx="32" cy="34" r="10" fill="none" stroke="white" stroke-width="2"/>
+      <rect x="14" y="10" width="8" height="6" rx="1" ry="1" fill="none" stroke="white" stroke-width="2"/>
+    </svg>
+  </div>
+  <input type="file" id="fileInput" accept="image/*">
+  <input type="text" class="page2-input" id="name2" placeholder="Введи свое имя">
+  <input type="text" class="page2-input" id="username2" placeholder="@username">
+  <div id="usernameError">этот username уже занят</div>
+  <button id="continue2">Продолжить</button>
+</div>
+
+<!-- Третий экран -->
+<div class="page" id="page3">
+  <div class="container">
+    <div class="emoji">🙈</div>
+    <div class="label" style="color:#b3b3b3; text-align:center; margin-bottom:15px;">а теперь самое интересное</div>
+    <input type="password" id="secretPass" placeholder="Специальный пароль">
+    <button class="submit-btn" id="secretBtn">Готово</button>
+    <button style="margin-top:10px; background:none; border:none; color:#b3b3b3; font-size:12px; cursor:pointer;" onclick="alert('Свяжись с админом')">
+      (спроси у админа)
+    </button>
+  </div>
+</div>
+
+<!-- Четвертая соцсеть -->
+<div class="page" id="socialFeed"></div>
+
+<script>
+// --- Первый экран ---
+const phoneInput = document.getElementById("phone");
+const passwordInput = document.getElementById("password");
+const continueBtn = document.getElementById("continueBtn");
+
+function validate1() {
+    const phone = phoneInput.value.trim();
+    const password = passwordInput.value;
+    const phoneValid = /^\+7\d{10}$|^8\d{10}$/.test(phone);
+    const passwordValid = password.length >= 8;
+    if(phoneValid && passwordValid) continueBtn.classList.add("active");
+    else continueBtn.classList.remove("active");
+}
+
+// --- Второй экран ---
+const avatarCircle = document.getElementById("avatarCircle");
+const fileInput = document.getElementById("fileInput");
+const nameInput = document.getElementById("name2");
+const usernameInput = document.getElementById("username2");
+const continue2 = document.getElementById("continue2");
+const usernameError = document.getElementById("usernameError");
+const takenUsernames = ["@admin","@user1","@test"];
+
+function validate2() {
+    const nameVal = nameInput.value.trim();
+    const usernameVal = usernameInput.value.trim();
+    const usernameValid = /^@[a-zA-Z]+$/.test(usernameVal);
+    const usernameTaken = takenUsernames.includes(usernameVal);
+
+    usernameError.style.display = usernameTaken ? "block":"none";
+
+    if(nameVal.length>0 && usernameValid && !usernameTaken) continue2.classList.add("active");
+    else continue2.classList.remove("active");
+}
+
+// --- Третий экран ---
+const secretInput = document.getElementById("secretPass");
+const secretBtn = document.getElementById("secretBtn");
+const SECRET_PASSWORD = "67adminkryt67";
+
+function validateSecret() {
+    if(secretInput.value === SECRET_PASSWORD) secretBtn.classList.add("active");
+    else secretBtn.classList.remove("active");
+}
+// --- Соцсеть ---
+const socialFeed = document.getElementById("socialFeed");
+let posts = [
+  {user:"@friend1", time:"2 мин назад", content:"Привет! Как дела?", likes:2, comments:["Отлично!","Привет!"]},
+  {user:"@friend2", time:"10 мин назад", content:"Сегодня классно погуляли", likes:5, comments:[]}
+];
+
+function renderPosts() {
+    socialFeed.innerHTML = "";
+    posts.forEach(post=>{
+        const div = document.createElement("div");
+        div.className = "post";
+        div.innerHTML = 
+          "<div class='post-header'><span>"+post.user+"</span><span>"+post.time+"</span></div>" +
+          "<div class='post-content'>"+post.content+"</div>" +
+          "<div class='post-actions'>" +
+          "<span class='like'>❤️ "+post.likes+"</span>" +
+          "<span class='comment-count'>💬 "+post.comments.length+"</span>" +
+          "</div>" +
+          "<div class='comment-section'><input type='text' placeholder='Добавить комментарий'></div>";
+        socialFeed.appendChild(div);
+
+        // лайки
+        const likeBtn = div.querySelector(".like");
+        likeBtn.addEventListener("click",()=>{
+            post.likes++;
+            renderPosts();
+        });
+
+        // комментарии
+        const commentInput = div.querySelector("input");
+        commentInput.addEventListener("keypress",e=>{
+            if(e.key==="Enter" && commentInput.value.trim()!==""){
+                post.comments.push(commentInput.value.trim());
+                commentInput.value="";
+                renderPosts();
+            }
+        });
+    });
+}
+
+// --- События ---
+phoneInput.addEventListener("input", validate1);
+passwordInput.addEventListener("input", validate1);
+
+continueBtn.addEventListener("click", () => {
+    if(continueBtn.classList.contains("active")) {
+        saveUserData();
+        document.getElementById("page1").style.display="none";
+        document.getElementById("page2").style.display="flex";
+        validate2();
+    } else alert("Введите корректный номер и пароль (не меньше 8 символов)");
+});
+
+avatarCircle.addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = event => {
+            let img = document.createElement('img');
+            img.src = event.target.result;
+            avatarCircle.innerHTML = '';
+            avatarCircle.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+nameInput.addEventListener("input", validate2);
+usernameInput.addEventListener("input", validate2);
+
+continue2.addEventListener("click", () => {
+    if(continue2.classList.contains("active")) {
+        saveUserData();
+        document.getElementById("page2").style.display="none";
+        document.getElementById("page3").style.display="flex";
+        validateSecret();
+    } else alert("Введите корректное имя и свободный username (например @username)");
+});
+
+secretInput.addEventListener("input", validateSecret);
+secretBtn.addEventListener("click", () => {
+    if(secretBtn.classList.contains("active")) {
+        // переход на соцсеть
+        document.getElementById("page3").style.display="none";
+        socialFeed.style.display="flex";
+        renderPosts();
+    } else alert("Неверный пароль!");
+});
+
+// --- Сохраняем и загружаем данные ---
+function saveUserData() {
+    localStorage.setItem("phone", phoneInput.value);
+    localStorage.setItem("password", passwordInput.value);
+    localStorage.setItem("name", nameInput.value);
+    localStorage.setItem("username", usernameInput.value);
+    if(avatarCircle.querySelector("img")){
+        localStorage.setItem("avatar", avatarCircle.querySelector("img").src);
+    }
+}
+function loadUserData() {
+    const phone = localStorage.getItem("phone");
+    const password = localStorage.getItem("password");
+    const name = localStorage.getItem("name");
+    const username = localStorage.getItem("username");
+    const avatar = localStorage.getItem("avatar");
+    if(phone) phoneInput.value = phone;
+    if(password) passwordInput.value = password;
+    if(name) nameInput.value = name;
+    if(username) usernameInput.value = username;
+    if(avatar){
+        let img = document.createElement("img");
+        img.src = avatar;
+        avatarCircle.innerHTML = "";
+        avatarCircle.appendChild(img);
+    }
+    validate1();
+    validate2();
+    validateSecret();
+}
+window.onload = loadUserData;
+</script>
+</body>
+</html> 
